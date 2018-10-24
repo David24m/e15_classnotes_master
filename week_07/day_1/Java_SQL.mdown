@@ -1,0 +1,270 @@
+##  Databases in Java
+
+##### Objectives
+
+- Create SQL tables
+- Create a multiple Java Models
+- Hook up models to a database and persist data
+- Map a row in our SQL table to an instance of an object
+
+### Introduction
+
+In Ruby we learned how to create a basic CRUD application to store Artists and Albums.
+We are now going to look at the same model in Java using SQLite.
+
+### SQLite
+
+SQLite is a software library that implements a self-contained, serverless, zero-configuration, transactional SQL database engine. SQLite is the most widely deployed SQL database engine in the world. The source code for SQLite is in the public domain.
+
+To use this we need to add the SQLite driver jar to our classpath.
+
+Copy the sqlite-jdbc-3.16.1.jar to user/sql folder.
+
+```
+#terminal
+
+~ subl .zshrc
+```
+
+In the zshrc file look for the following line:
+
+```
+export CLASSPATH="$CLASSPATH:$JUNIT_HOME/junit-4.11.jar:$JUNIT_HOME/hamcrest-core-1.3.jar:$JUNIT_HOME/mockito-all-1.9.5.jar
+```
+
+Add the following to the end of the classpath
+```
+:/Users/user/sql/sqlite-jdbc-3.16.1.jar
+```
+Class path should now look like this:
+export CLASSPATH="$CLASSPATH:$JUNIT_HOME/junit-4.11.jar:$JUNIT_HOME/hamcrest-core-1.3.jar:$JUNIT_HOME/mockito-all-1.9.5.jar:/Users/user/sql/sqlite-jdbc-3.16.1.jar"
+
+
+Close terminal and reopen.
+
+### SQLite in Java
+
+[i] Hand out starter code and ask students to look at the SQLRunner file.
+
+In ruby we were able to connect to a database quite simply by using the PG module to do the work for us.
+In Java we are unable to do this so we are required to write the code that will connect to the database, allow us to create and run statements and return a set of results from the database.
+
+In the SQL Runner we have defined 4 methods in order for us to do this.
+
+```
+private static void connect() {
+```
+
+This method creates a connection to the database.
+
+To do this we have to specify a driver to be used to handle the connection.
+
+```
+Class.forName("org.sqlite.JDBC");
+c = DriverManager.getConnection("jdbc:sqlite:db/music.db");
+```
+
+This allows us to connect to the database from within the java application.
+
+Once we are connected we can then execute our SQL statements in a very similar manner to the way we did in Ruby.
+
+You will notice that there are 2 execute functions.
+
+```
+public static int executeUpdate(String sql) {
+
+public static ResultSet executeQuery(String sql) {
+```
+
+That is because SQL has an execute for SELECT queries and a seperate one for any statement that will change data in the database... (INSERT, UPDATE, DELETE, etc)
+
+The executeQuery returns a resultSet which is similar to the object that psql returned in Ruby. (Hash like object).
+
+executeUpdate returns an integer so that we can assign to the id of our Artist/Album. (Again remember we wrote this as part of our SQL statement in Ruby - returning id; - we cannot do this in SQL so the function returns this for us.)
+
+Also notice that the functions are static so that we don't have to create a new instance of SQLRunner. (similar to self.run in Ruby)
+
+### CRUD functions.
+
+OK so now that we are all SQLRunner masters lets actually perform some functions.
+
+First off is to create our database and tables. We are going to use SQLite's terminal tool sqlite3.
+
+[i] Talk through music.sql especially ID column and how this is similar from SERIAL4 in psql.
+
+First of all we need to add SQLite to our build file.
+
+Open build.gradle(Module: App) and add the following line:
+
+```
+testCompile 'junit:junit:4.12'
+compile 'org.xerial:sqlite-jdbc:3.16.1' #NEW
+```
+
+Navigate to db folder.
+
+```
+#terminal (in db folder)
+cd app/src/main/java/db
+
+sqlite3 music.db < music.sql
+```
+
+This command creates the music database and runs our music.sql file.
+
+We can now check this by connecting to the music database and checking tables.
+
+```
+#terminal
+sqlite3 music.db
+
+>sqlite .tables
+```
+
+We now need to tell SqlRunner where to look for our db file.
+
+open up SqlRunner and change the following line:
+
+```
+# SqlRunner.java
+
+c = DriverManager.getConnection("jdbc:sqlite:./app/src/main/java/db/music.db"); # AMENDED
+```
+
+So now let's complete the save() function in Artist class.
+
+```
+
+#Artist.java
+
+public void save() {
+    String sql = String.format("INSERT INTO artists (name) VALUES ('%s');",
+            this.name);
+    this.id = SqlRunner.executeUpdate(sql);
+    SqlRunner.closeConnection();
+}
+```
+In here we are using String.format(). This allows us to use string interpolation to add in values. %s for a string and %d for a digit. The order we put them in the string is the order it will assign values we declare after.
+
+Notice that when we executeUpdate it will return integer of the SQL id assigned to the object so we set this as this.id.
+
+So lets create an Artist to save.
+
+```
+#Runner.java
+Artist artist1 = new Artist("Led Zeppelin");
+
+artist1.save();
+```
+We can now go to our terminal and check that this has been added.
+
+```
+#terminal
+sqlite3 music.db
+
+>sqlite SELECT * FROM artists;
+
+```
+
+Cool so we have saved an artist so lets write the other CRUD functions.
+
+```
+#Artist.java
+
+public static void all(){
+    String sql = "SELECT * FROM artists;";
+    ResultSet rs = SqlRunner.executeQuery(sql);
+    try {
+        while (rs.next()) {
+            String name = rs.getString("name");
+            System.out.println(name);
+            System.out.println();
+        }
+    } catch (Exception e) {
+        System.err.println(e.getClass().getName() + " : " + e.getMessage());
+        System.exit(0);
+    } finally {
+        SqlRunner.closeConnection();
+    }
+}
+```
+So now we have returned all of the Artists in the artists table.
+
+```
+#Artist.java
+
+public static void deleteAll(){
+    String sql = "DELETE FROM artists;";
+    SqlRunner.executeUpdate(sql);
+    SqlRunner.closeConnection();
+
+}
+
+public void delete() {
+  String sql = String.format(DELETE FROM artists WHRERE id = %d;", this.id);
+  SqlRunner.executeUpdate(sql)
+  SqlRunner.closeConnection();
+}
+
+public void update() {
+    String sql = String.format("UPDATE artists SET name = '%s' WHERE id = %d;", this.name, this.id);
+    SqlRunner.executeUpdate(sql);
+    SqlRunner.closeConnection();
+}
+```
+So now we can update and delete all or one from the table. Yay!
+
+
+## Task 30 mins
+
+Write CRUD functions for the Album class to save, update, select all, delete one and delete all.
+
+```
+
+#Album.java
+
+public void save() {
+        int artist_id = artist.getId();
+        String sql = String.format(
+                "INSERT INTO albums (title, genre, artist_id) VALUES ('%s', '%s', %d); "
+                , this.title, this.genre, artist_id);
+        this.id = SqlRunner.executeUpdate(sql);
+        SqlRunner.closeConnection();
+    }
+
+public static void all(){
+    String sql = "SELECT * FROM albums;";
+    ResultSet rs = SqlRunner.executeQuery(sql);
+    try {
+        while (rs.next()) {
+            String name = rs.getString("title");
+            String genre = rs.getString("genre");
+            int artistId = rs.getInt("artist_id");
+            System.out.println(name);
+            System.out.println(genre);
+            System.out.println(artistId);
+            System.out.println();
+        }
+    } catch (Exception e) {
+        System.err.println(e.getClass().getName() + " : " + e.getMessage());
+        System.exit(0);
+    } finally {
+        SqlRunner.closeConnection();
+    }
+}
+
+
+public static void deleteAll(){
+    String sql = "DELETE FROM albums;";
+    SqlRunner.executeUpdate(sql);
+    SqlRunner.closeConnection();
+
+}
+
+public void update() {
+    String sql = String.format("UPDATE albums SET title = '%s' , SET genre = '%s', SET artist_id = %d WHERE id = %d;", this.title, this.genre, this.artist.getId(), this.id);
+    SqlRunner.executeUpdate(sql);
+    SqlRunner.closeConnection();
+}
+
+```

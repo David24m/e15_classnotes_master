@@ -1,0 +1,29 @@
+.hide {
+  display: none;
+}
+
+.blue {
+  background-color: dodgerblue;
+}
+
+/*.hide {
+  visibility: hidden;
+}*/
+
+/*
+.hide {
+  opacity: 0;
+}*/
+
+.logo {
+  width: 50px;
+  height: 50px;
+}
+
+.red-quote{
+  color: tomato;
+}
+
+.quote {
+  /*all whole bunch of stuff*/
+}

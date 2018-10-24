@@ -1,0 +1,68 @@
+[
+   {
+      "name": "Harry Potter",
+      "Gender": "Male",
+      "Hair": "Black",
+      "House": "Gryffindor",
+      "Death Eater": "False",
+      "image": "/images/hp/harry.jpg"
+   },
+   {
+      "name": "Ron Weasley",
+      "Gender": "Male",
+      "Hair": "Red",
+      "House": "Gryffindor",
+      "Death Eater": "False",
+      "image": "/images/hp/ron.jpg"
+   },
+   {
+      "name": "Hermione Granger",
+      "Gender": "Female",
+      "Hair": "Brown",
+      "House": "Gryffindor",
+      "Death Eater": "False",
+      "image": "/images/hp/hermione.jpeg"
+   },
+   {
+      "name": "Luna Lovegood",
+      "Gender": "Female",
+      "Hair": "Blonde",
+      "House": "Ravenclaw",
+      "Death Eater": "False",
+      "image": "/images/hp/luna.jpg"
+   },
+   {
+      "name": "Draco Malfoy",
+      "Gender": "Male",
+      "Hair": "Blonde",
+      "House": "Slytherin",
+      "Death Eater": "True",
+      "image": "/images/hp/draco.jpg"
+   },
+   {
+      "name": "Cedric Diggory",
+      "Gender": "Male",
+      "Hair": "Blonde",
+      "House": "Hufflepuff",
+      "Death Eater": "False",
+      "image": "/images/hp/cedric.png"
+   },
+   {
+      "name": "Cho Chang",
+      "Gender": "Female",
+      "Hair": "Black",
+      "House": "Ravenclaw",
+      "Death Eater": "False",
+      "image": "/images/hp/cho.jpg"
+   },
+   {
+      "name": "Rubeus Hagrid",
+      "Gender": "Male",
+      "Hair": "Brown",
+      "House": "Gryffindor",
+      "Death Eater": "False",
+      "image": "/images/hp/hagrid.png"
+   }
+
+]
+
